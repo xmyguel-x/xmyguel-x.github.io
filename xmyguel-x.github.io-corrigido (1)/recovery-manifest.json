@@ -1,0 +1,20 @@
+{
+  "original_page": "https://id-preview--79b70b58-6d56-4956-b652-b34cb494d8a8.lovable.app/",
+  "recovered_modules": [
+    {
+      "path": "/assets/engine-_K4YV0Me.js",
+      "bytes": 61166
+    },
+    {
+      "path": "/assets/routes-a600ZoZK.js",
+      "bytes": 77274
+    },
+    {
+      "path": "/assets/batalha-B9bTLxU3.js",
+      "bytes": 7230
+    }
+  ],
+  "main_bundle_bytes": 580094,
+  "stylesheet_rules": 89,
+  "fullscreen_added": true
+}
