@@ -26,7 +26,7 @@
     const highDensity = document.getElementById("offline-resources-2x");
     const normal = document.getElementById("offline-resources-1x");
     if (highDensity && highDensity.complete && highDensity.naturalWidth) {
-      return { image: highDensity, x: 1872, y: 4, width: 88, height: 94 };
+      return { image: highDensity, x: 1854, y: 2, width: 88, height: 94 };
     }
     if (normal && normal.complete && normal.naturalWidth) {
       return { image: normal, x: 936, y: 2, width: 44, height: 47 };
