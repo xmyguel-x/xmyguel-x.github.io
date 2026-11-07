@@ -44,7 +44,7 @@ dino.on("frame", ({ ctx }) => {
     b.x += b.vx; b.y += b.vy; b.vy += 0.15;
     ctx.fillStyle = b.c; ctx.fillRect(b.x, b.y, 3, 3);
   }
-});`},{id:\`the-last-run\`,name:\`THE LAST RUN\`,description:\`Enfrente o T-Rex gigante, desvie do fogo e sobreviva ao impacto final.\`,author:\`DinoMod\`,builtin:!0,category:\`boss\`,code:\`let started = false, ending = false, elapsed = 0, bossX = 0, lastTime = 0, fireStart = -1, finished = false;
+});`},{id:`the-last-run`,name:`THE LAST RUN`,description:`Enfrente o T-Rex gigante, desvie do fogo e sobreviva ao impacto final.`,author:`DinoMod`,builtin:!0,category:`boss`,code:`let started = false, ending = false, elapsed = 0, bossX = 0, lastTime = 0, fireStart = -1, finished = false;
 dino.on("restart", () => { started = false; ending = false; elapsed = 0; bossX = 0; lastTime = 0; fireStart = -1; finished = false; });
 dino.on("milestone", ({ game }) => {
   if (!started && game.score >= 300) { started = true; bossX = game.width + 30; dino.log("THE LAST RUN: RUN!"); }
@@ -129,7 +129,7 @@ dino.on("frame", ({ runner, ctx, deltaTime, game }) => {
     }
     ctx.restore();
   }
-});\`}],Ft=[...Nt,...Pt],It=`// Seu mod recebe o objeto "dino".
+});`}],Ft=[...Nt,...Pt],It=`// Seu mod recebe o objeto "dino".
 // Eventos: init, frame, jump, collision, milestone, gameOver, restart
 dino.on("gameOver", ({ score }) => {
   dino.log("Fez " + score + " pontos!");
