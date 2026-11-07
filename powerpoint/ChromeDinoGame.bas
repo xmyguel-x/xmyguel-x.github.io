@@ -37,20 +37,20 @@ Public Sub StartChromeDino()
     Next sh
     On Error GoTo 0
 
-    Set groundLine = s.Shapes.AddShape(msoShapeRectangle, Inches(0.55), Inches(GROUND + 0.43), Inches(12.2), Inches(0.025))
+    Set groundLine = s.Shapes.AddShape(msoShapeRectangle, InchesToPoints(0.55), InchesToPoints(GROUND + 0.43), InchesToPoints(12.2), InchesToPoints(0.025))
     groundLine.Name = "DINO__Ground"
     groundLine.Fill.ForeColor.RGB = RGB(83, 83, 83)
     groundLine.Line.Visible = msoFalse
 
-    Set player = s.Shapes.AddPicture(basePath & "dino-run-1.png", msoFalse, msoTrue, Inches(PLAYER_X), Inches(GROUND - 0.40), Inches(0.37), Inches(0.40))
+    Set player = s.Shapes.AddPicture(basePath & "dino-run-1.png", msoFalse, msoTrue, InchesToPoints(PLAYER_X), InchesToPoints(GROUND - 0.40), InchesToPoints(0.37), InchesToPoints(0.40))
     player.Name = "DINO__Player"
 
-    Set cactus = s.Shapes.AddShape(msoShapeRectangle, Inches(FIELD_RIGHT), Inches(GROUND - 0.42), Inches(0.18), Inches(0.42))
+    Set cactus = s.Shapes.AddShape(msoShapeRectangle, InchesToPoints(FIELD_RIGHT), InchesToPoints(GROUND - 0.42), InchesToPoints(0.18), InchesToPoints(0.42))
     cactus.Name = "DINO__Obstacle"
     cactus.Fill.ForeColor.RGB = RGB(83, 83, 83)
     cactus.Line.Visible = msoFalse
 
-    Set scoreBox = s.Shapes.AddTextbox(msoTextOrientationHorizontal, Inches(10.6), Inches(0.35), Inches(1.7), Inches(0.35))
+    Set scoreBox = s.Shapes.AddTextbox(msoTextOrientationHorizontal, InchesToPoints(10.6), InchesToPoints(0.35), InchesToPoints(1.7), InchesToPoints(0.35))
     scoreBox.Name = "DINO__Score"
     scoreBox.TextFrame.TextRange.Font.Name = "Arial"
     scoreBox.TextFrame.TextRange.Font.Size = 18
@@ -80,11 +80,11 @@ Private Sub TickGame()
     End If
 
     If KeyPressed(VK_DOWN) And y >= GROUND - 0.41 Then
-        player.Height = Inches(0.22)
-        player.Top = Inches(GROUND - 0.22)
+        player.Height = InchesToPoints(0.22)
+        player.Top = InchesToPoints(GROUND - 0.22)
     ElseIf y >= GROUND - 0.41 Then
-        player.Height = Inches(0.40)
-        player.Top = Inches(y)
+        player.Height = InchesToPoints(0.40)
+        player.Top = InchesToPoints(y)
     End If
 
     If vy <> 0 Or y < GROUND - 0.41 Then
@@ -94,21 +94,21 @@ Private Sub TickGame()
             y = GROUND - 0.41
             vy = 0
         End If
-        player.Top = Inches(y)
+        player.Top = InchesToPoints(y)
     End If
 
-    cactus.Left = cactus.Left - Inches(speed)
-    If cactus.Left < Inches(0.25) Then
-        cactus.Left = Inches(FIELD_RIGHT + 0.5 + Rnd() * 2.1)
+    cactus.Left = cactus.Left - InchesToPoints(speed)
+    If cactus.Left < InchesToPoints(0.25) Then
+        cactus.Left = InchesToPoints(FIELD_RIGHT + 0.5 + Rnd() * 2.1)
         points = points + 10
         speed = speed + 0.006
     End If
 
     scoreBox.TextFrame.TextRange.Text = Format$(points, "00000")
 
-    If cactus.Left < player.Left + player.Width - Inches(0.05) _
-       And cactus.Left + cactus.Width > player.Left + Inches(0.05) _
-       And player.Top + player.Height > cactus.Top + Inches(0.05) Then
+    If cactus.Left < player.Left + player.Width - InchesToPoints(0.05) _
+       And cactus.Left + cactus.Width > player.Left + InchesToPoints(0.05) _
+       And player.Top + player.Height > cactus.Top + InchesToPoints(0.05) Then
         running = False
         MsgBox "GAME OVER!" & vbCrLf & "Pontuação: " & points & vbCrLf & "Pressione R para jogar novamente.", vbInformation, "Chrome Dino"
         WaitForR
@@ -138,12 +138,12 @@ Private Sub ResetRound()
     speed = 0.075
     points = 0
     If Not player Is Nothing Then
-        player.Top = Inches(y)
-        player.Height = Inches(0.40)
+        player.Top = InchesToPoints(y)
+        player.Height = InchesToPoints(0.40)
     End If
     If Not cactus Is Nothing Then
-        cactus.Left = Inches(FIELD_RIGHT)
-        cactus.Top = Inches(GROUND - 0.42)
+        cactus.Left = InchesToPoints(FIELD_RIGHT)
+        cactus.Top = InchesToPoints(GROUND - 0.42)
     End If
 End Sub
 
