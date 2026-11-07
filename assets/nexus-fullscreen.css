@@ -45,3 +45,23 @@
   top: 12px;
   right: 14px;
 }
+
+/* Real fullscreen scaling for the original 600x150 Dino canvas */
+[data-nexus-fullscreen]:fullscreen #dino-stage {
+  width: min(96vw, 1400px) !important;
+  max-width: none !important;
+  height: min(40vh, 360px) !important;
+  min-height: 180px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
+}
+[data-nexus-fullscreen]:fullscreen #dino-stage .runner-container {
+  transform: scale(2.1);
+  transform-origin: center center;
+}
+[data-nexus-fullscreen]:fullscreen #dino-stage .runner-canvas {
+  max-width: none !important;
+  height: 150px !important;
+}
