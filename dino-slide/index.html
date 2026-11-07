@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dino Runner 16:9</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;background:#111820;font-family:Verdana,Arial,sans-serif;overflow:hidden}
+body{display:grid;place-items:center}
+#screen{position:relative;width:min(100vw,177.7778vh);height:min(100vh,56.25vw);aspect-ratio:16/9;background:#f7f7f7;overflow:hidden;box-shadow:0 14px 60px #0008}
+canvas{display:block;width:100%;height:100%;touch-action:manipulation}
+#hint{position:absolute;left:2.5%;bottom:2.4%;font-size:clamp(9px,1vw,15px);color:#888;pointer-events:none;letter-spacing:.04em}
+#full{position:absolute;right:2%;bottom:1.6%;padding:.55em .8em;border:1px solid #aaa;border-radius:4px;background:#fff;color:#555;font-size:clamp(9px,.9vw,14px);cursor:pointer}
+#full:hover{background:#eee}
+</style>
+</head>
+<body>
+<main id="screen">
+<canvas id="game" width="1600" height="900" aria-label="Chrome Dino Runner"></canvas>
+<div id="hint">ESPAÇO / ↑ PULAR · ↓ ABAIXAR · TOQUE OU CLIQUE PARA PULAR</div>
+<button id="full" type="button">TELA CHEIA</button>
+</main>
+<script>
+(() => {
+  'use strict';
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const W = 1600, H = 900, GROUND = 690;
+  const sprite = new Image();
+  sprite.src = '../dino/sprite-1x.png';
+
+  const game = {
+    started:false, over:false, score:0,
+    best:Number(localStorage.getItem('dinoSlideBest') || 0),
+    speed:8, frame:0, last:0, spawn:0,
+    groundOffset:0, clouds:[{x:220,y:175},{x:800,y:115},{x:1290,y:205}],
+    obstacles:[],
+    trex:{x:190,y:GROUND-94,w:88,h:94,vy:0,duck:false,anim:0}
+  };
+  const rand=(a,b)=>a+Math.random()*(b-a);
+  const fill=(x,y,w,h,color)=>{ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));};
+
+  function drawTrex(){
+    const t=game.trex;
+    if(sprite.complete && sprite.naturalWidth){
+      let sx=848, sy=2, sw=44, sh=47;
+      if(t.duck){sx=1112;sw=59;sh=25;}
+      else if(t.y<GROUND-t.h-1){sx=848;}
+      else {sx=(Math.floor(t.anim/7)%2===0)?936:980;}
+      const dw=t.duck?118:88, dh=t.duck?50:94;
+      ctx.imageSmoothingEnabled=false;
+      ctx.drawImage(sprite,sx,sy,sw,sh,t.x,t.y+(t.duck?32:0),dw,dh);
+    }else{
+      fill(t.x+18,t.y+20,55,58,'#535353');
+      fill(t.x+50,t.y+2,35,38,'#535353');
+      fill(t.x+70,t.y+17,18,12,'#535353');
+      fill(t.x+24,t.y+70,17,24,'#535353');
+      fill(t.x+58,t.y+70,17,24,'#535353');
+    }
+  }
+
+  function drawCactus(o){
+    const x=o.x, base=GROUND, h=o.h;
+    ctx.fillStyle='#535353';
+    ctx.fillRect(x+22,base-h,20,h);
+    ctx.fillRect(x+4,base-h+35,18,15);
+    ctx.fillRect(x+4,base-h+16,12,34);
+    ctx.fillRect(x+42,base-h+54,18,14);
+    ctx.fillRect(x+48,base-h+31,12,37);
+  }
+
+  function drawBird(o){
+    const flap=Math.floor(game.frame/8)%2;
+    fill(o.x+12,o.y+18,52,20,'#535353');
+    fill(o.x+52,o.y+8,22,18,'#535353');
+    fill(o.x+70,o.y+15,12,7,'#535353');
+    if(flap){fill(o.x+20,o.y,30,20,'#535353');fill(o.x+25,o.y+35,30,12,'#535353');}
+    else{fill(o.x+18,o.y+29,28,19,'#535353');fill(o.x+24,o.y+2,28,12,'#535353');}
+  }
+
+  function drawCloud(c){
+    fill(c.x,c.y,78,15,'#dedede');
+    fill(c.x+18,c.y-15,35,20,'#dedede');
+    fill(c.x+48,c.y-8,32,13,'#dedede');
+  }
+
+  function draw(){
+    fill(0,0,W,H,'#f7f7f7');
+    game.clouds.forEach(drawCloud);
+    ctx.strokeStyle='#777';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(0,GROUND);ctx.lineTo(W,GROUND);ctx.stroke();
+    for(let i=0;i<24;i++){
+      const x=((i*91-game.groundOffset)%W+W)%W;
+      fill(x,GROUND+18,20,3,'#aaa');
+    }
+    game.obstacles.forEach(o=>o.type==='bird'?drawBird(o):drawCactus(o));
+    if(game.started)drawTrex();
+
+    ctx.textAlign='right';ctx.fillStyle='#535353';
+    ctx.font='bold 30px monospace';
+    ctx.fillText(String(Math.floor(game.score)).padStart(5,'0'),W-70,76);
+    ctx.fillStyle='#999';ctx.font='20px monospace';
+    ctx.fillText('HI '+String(Math.floor(game.best)).padStart(5,'0'),W-285,76);
+
+    if(!game.started || game.over){
+      ctx.textAlign='center';ctx.fillStyle='#535353';
+      ctx.font='bold 50px Verdana';
+      ctx.fillText(game.over?'FIM DE JOGO':'DINO RUNNER',W/2,345);
+      ctx.font='25px Verdana';ctx.fillStyle='#777';
+      ctx.fillText(game.over?'ESPAÇO, ↑ OU TOQUE PARA REINICIAR':'ESPAÇO, ↑ OU TOQUE PARA COMEÇAR',W/2,405);
+    }
+  }
+
+  function start(){
+    game.started=true;game.over=false;game.score=0;game.speed=8;game.spawn=35;
+    game.obstacles=[];game.trex.y=GROUND-game.trex.h;game.trex.vy=0;game.trex.duck=false;
+  }
+  function jump(){
+    if(!game.started||game.over){start();return;}
+    const t=game.trex;
+    if(t.y>=GROUND-t.h-1){t.vy=-23;}
+  }
+  function setDuck(value){
+    const t=game.trex;t.duck=value;
+    if(value && t.y>=GROUND-t.h-1){t.y=GROUND-62;}
+    else if(!value && t.y>GROUND-t.h){t.y=GROUND-t.h;}
+  }
+
+  function update(dt){
+    game.frame+=dt;
+    game.clouds.forEach(c=>{c.x-=.35*dt;if(c.x<-100)c.x=W+rand(50,300);});
+    if(!game.started||game.over)return;
+    const t=game.trex;
+    if(!t.duck){t.vy+=1.15*dt;t.y+=t.vy*dt;if(t.y>GROUND-t.h){t.y=GROUND-t.h;t.vy=0;}}
+    t.anim+=dt;
+    game.score+=.12*dt*game.speed;
+    game.speed=Math.min(18,8+game.score/850);
+    game.groundOffset=(game.groundOffset+game.speed*dt)%W;
+    game.spawn-=dt;
+    if(game.spawn<=0){
+      const makeBird=game.score>450&&Math.random()<.22;
+      game.obstacles.push(makeBird
+        ?{type:'bird',x:W+50,y:GROUND-(Math.random()<.5?150:100),w:82,h:50}
+        :{type:'cactus',x:W+50,w:64,h:rand(75,112)});
+      game.spawn=rand(72,118)*(8/game.speed);
+    }
+    game.obstacles.forEach(o=>o.x-=game.speed*dt);
+    game.obstacles=game.obstacles.filter(o=>o.x>-150);
+    const px=t.x+12, py=t.duck?t.y+35:t.y+12, pw=60, ph=t.duck?42:75;
+    for(const o of game.obstacles){
+      const bx=o.x+5,by=o.type==='bird'?o.y+5:GROUND-o.h+4,bw=o.type==='bird'?70:55,bh=o.type==='bird'?40:o.h-4;
+      if(px<bx+bw&&px+pw>bx&&py<by+bh&&py+ph>by){
+        game.over=true;game.best=Math.max(game.best,game.score);
+        localStorage.setItem('dinoSlideBest',String(Math.floor(game.best)));
+        break;
+      }
+    }
+  }
+
+  function loop(now){
+    const dt=Math.min((now-game.last)/16.666||1,2);
+    game.last=now;update(dt);draw();requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('keydown',e=>{
+    if(['Space','ArrowUp','ArrowDown'].includes(e.code))e.preventDefault();
+    if((e.code==='Space'||e.code==='ArrowUp')&&!e.repeat)jump();
+    if(e.code==='ArrowDown'||e.code==='KeyS')setDuck(true);
+  },{passive:false});
+  window.addEventListener('keyup',e=>{
+    if(e.code==='ArrowDown'||e.code==='KeyS')setDuck(false);
+  });
+  canvas.addEventListener('pointerdown',jump);
+  document.getElementById('full').addEventListener('click',()=>{
+    const el=document.getElementById('screen');
+    if(!document.fullscreenElement)el.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  });
+  draw();game.last=performance.now();requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
