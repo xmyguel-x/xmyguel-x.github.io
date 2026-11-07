@@ -1,173 +1,222 @@
 /*
- * THE LAST RUN
- * Protótipo visual isolado para o sistema de mods do DinoMod.
- * Instale pelo painel "Criar mod" > "Importar .js / .json".
- * Esta versão não altera o motor nem interfere nas colisões.
+ * THE LAST RUN - Boss + gameplay prototype
+ * Uses the original Chrome Dino sprite sheet.
+ * Imported through DinoMod > Criar mod > Importar .js / .json.
  */
 (() => {
   const state = {
     elapsed: 0,
-    lastCtx: null,
-    lastWidth: 600,
-    lastHeight: 150,
-    meteorStarted: false,
-    meteorAt: 0,
-    gameOver: false
+    health: 3,
+    attacks: [],
+    nextFireAt: 0,
+    nextMeteorAt: 0,
+    invulnerableUntil: 0,
+    slowUntil: 0,
+    restoreSpeed: null,
+    gameOver: false,
+    attackId: 0
   };
 
-  const pixel = (ctx, x, y, w, h, color) => {
-    ctx.fillStyle = color;
-    ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
-  };
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+  const hit = (a, b) =>
+    a.x < b.x + b.width && a.x + a.width > b.x &&
+    a.y < b.y + b.height && a.y + a.height > b.y;
 
-  function drawBoss(ctx, x, y, scale, time) {
-    const p = (a, b, w, h, color = "#252525") =>
-      pixel(ctx, x + a * scale, y + b * scale, w * scale, h * scale, color);
-
-    // Corpo e cauda: silhueta de um T-Rex gigante em pixel art.
-    p(18, 18, 28, 16);
-    p(10, 22, 12, 8);
-    p(2, 25, 12, 4);
-    p(38, 12, 15, 13);
-    p(48, 7, 19, 13);
-    p(59, 14, 13, 7);
-    p(63, 20, 12, 4);
-    p(29, 32, 9, 13);
-    p(39, 31, 8, 14);
-    p(25, 42, 15, 4);
-    p(37, 42, 15, 4);
-    p(47, 25, 7, 7, "#171717");
-    p(52, 14, 4, 4, "#fff");
-    p(53, 15, 2, 2, "#e53935");
-    p(64, 23, 3, 2, "#f5f5f5");
-
-    // Pequeno balanço do corpo.
-    if (Math.floor(time / 180) % 2) {
-      p(29, 31, 9, 14);
-      p(39, 32, 8, 13);
+  function getDinoSheet() {
+    const highDensity = document.getElementById("offline-resources-2x");
+    const normal = document.getElementById("offline-resources-1x");
+    if (highDensity && highDensity.complete && highDensity.naturalWidth) {
+      return { image: highDensity, x: 1872, y: 4, width: 88, height: 94 };
     }
+    if (normal && normal.complete && normal.naturalWidth) {
+      return { image: normal, x: 936, y: 2, width: 44, height: 47 };
+    }
+    return null;
   }
 
-  function drawFire(ctx, width, height, time) {
-    const pulse = 0.82 + Math.sin(time / 55) * 0.18;
-    const startX = width - 170;
-    const y = height - 57;
+  function drawBoss(ctx, width, height, time) {
+    const sprite = getDinoSheet();
+    if (!sprite) return;
+
+    const scale = clamp(width / 390, 1.65, 2.15);
+    const bossWidth = 44 * scale;
+    const bossHeight = 47 * scale;
+    const x = width - bossWidth - 24;
+    const y = height - bossHeight - 10;
+    const frame = Math.floor(time / 150) % 2;
+    const sourceX = sprite.x + frame * sprite.width;
+
     ctx.save();
-    ctx.globalAlpha = 0.92;
-    ctx.fillStyle = "#e53935";
-    ctx.beginPath();
-    ctx.moveTo(startX, y);
-    ctx.lineTo(startX - 115 * pulse, y - 17);
-    ctx.lineTo(startX - 83 * pulse, y + 1);
-    ctx.lineTo(startX - 125 * pulse, y + 14);
-    ctx.lineTo(startX, y + 13);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = "#ff9800";
-    ctx.beginPath();
-    ctx.moveTo(startX, y + 3);
-    ctx.lineTo(startX - 82 * pulse, y - 7);
-    ctx.lineTo(startX - 55 * pulse, y + 5);
-    ctx.lineTo(startX - 88 * pulse, y + 11);
-    ctx.lineTo(startX, y + 10);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = "#fff176";
-    ctx.fillRect(startX - 43 * pulse, y + 1, 34 * pulse, 5);
+    ctx.imageSmoothingEnabled = false;
+    ctx.translate(x + bossWidth, y);
+    ctx.scale(-1, 1);
+    ctx.drawImage(
+      sprite.image,
+      sourceX, sprite.y, sprite.width, sprite.height,
+      0, 0, bossWidth, bossHeight
+    );
     ctx.restore();
-  }
-
-  function drawMeteor(ctx, width, height, time) {
-    const travel = Math.min(1, Math.max(0, (time - state.meteorAt) / 2100));
-    const x = width + 30 - travel * (width + 110);
-    const y = 12 + travel * (height - 42);
 
     ctx.save();
-    ctx.globalAlpha = 0.45;
-    ctx.strokeStyle = "#ff7043";
-    ctx.lineWidth = 9;
-    ctx.beginPath();
-    ctx.moveTo(x + 34, y - 22);
-    ctx.lineTo(x + 4, y + 2);
-    ctx.stroke();
-
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = "#8d3b25";
-    ctx.beginPath();
-    ctx.arc(x, y, 11, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#ffab40";
-    ctx.beginPath();
-    ctx.arc(x - 3, y - 3, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  function drawTitle(ctx, width) {
-    ctx.save();
-    ctx.textAlign = "center";
-    ctx.font = "bold 13px monospace";
     ctx.fillStyle = "#b71c1c";
-    ctx.fillText("THE LAST RUN", width / 2, 22);
-    ctx.font = "9px monospace";
-    ctx.fillStyle = "#444";
-    ctx.fillText("THE CHASE HAS BEGUN", width / 2, 34);
+    ctx.font = "bold 11px monospace";
+    ctx.textAlign = "right";
+    ctx.fillText("THE LAST RUN", width - 10, 17);
     ctx.restore();
   }
 
-  dino.on("frame", ({ ctx, game, deltaTime }) => {
-    if (!ctx || !game) return;
-    state.lastCtx = ctx;
-    state.lastWidth = game.width || 600;
-    state.lastHeight = game.height || 150;
+  function spawnFire(width, height) {
+    state.attacks.push({
+      id: ++state.attackId,
+      type: "fire",
+      x: width - 145,
+      y: height - 30,
+      width: 25,
+      height: 13,
+      vx: -0.34,
+      age: 0
+    });
+  }
 
-    if (!game.playing) return;
+  function spawnMeteor(width, height) {
+    state.attacks.push({
+      id: ++state.attackId,
+      type: "meteor",
+      x: width + 24,
+      y: height - 66,
+      width: 17,
+      height: 17,
+      vx: -0.43,
+      age: 0
+    });
+  }
 
-    state.elapsed += Math.min(Number(deltaTime) || 16, 50);
+  function drawAttack(ctx, attack, time) {
+    ctx.save();
+    if (attack.type === "fire") {
+      const flicker = Math.floor(time / 75) % 2;
+      ctx.fillStyle = "#c62828";
+      ctx.fillRect(attack.x, attack.y + 5, 22, 8);
+      ctx.fillStyle = "#ff6d00";
+      ctx.fillRect(attack.x + 4, attack.y + flicker * 2, 15, 9);
+      ctx.fillStyle = "#fff176";
+      ctx.fillRect(attack.x + 8, attack.y + 4, 7, 5);
+    } else {
+      ctx.fillStyle = "#6d3023";
+      ctx.fillRect(attack.x + 3, attack.y + 2, 13, 13);
+      ctx.fillStyle = "#ff7043";
+      ctx.fillRect(attack.x + 6, attack.y + 4, 7, 7);
+      ctx.fillStyle = "rgba(255,112,67,.45)";
+      ctx.fillRect(attack.x + 16, attack.y + 5, 19, 6);
+    }
+    ctx.restore();
+  }
+
+  function drawHud(ctx, width) {
+    ctx.save();
+    ctx.textAlign = "left";
+    ctx.font = "bold 10px monospace";
+    ctx.fillStyle = "#333";
+    ctx.fillText("BOSS HP", 10, 16);
+    for (let i = 0; i < 3; i++) {
+      ctx.fillStyle = i < state.health ? "#d32f2f" : "#bdbdbd";
+      ctx.fillRect(67 + i * 14, 8, 10, 9);
+    }
+    ctx.restore();
+  }
+
+  function reset() {
+    state.elapsed = 0;
+    state.health = 3;
+    state.attacks = [];
+    state.nextFireAt = 0;
+    state.nextMeteorAt = 0;
+    state.invulnerableUntil = 0;
+    state.slowUntil = 0;
+    state.restoreSpeed = null;
+    state.gameOver = false;
+    state.attackId = 0;
+  }
+
+  dino.on("frame", ({ runner, ctx, game, deltaTime }) => {
+    if (!ctx || !game || !game.playing || state.gameOver) return;
+
+    const dt = clamp(Number(deltaTime) || 16, 0, 50);
+    state.elapsed += dt;
     const score = Number(game.score) || 0;
+    const width = game.width || 600;
+    const height = game.height || 150;
+
     if (score < 180) return;
 
-    const width = state.lastWidth;
-    const height = state.lastHeight;
+    if (score >= 350 && state.nextFireAt === 0) {
+      state.nextFireAt = state.elapsed + 900;
+    }
+    if (score >= 650 && state.nextMeteorAt === 0) {
+      state.nextMeteorAt = state.elapsed + 1700;
+    }
+
+    if (score >= 350 && state.elapsed >= state.nextFireAt) {
+      spawnFire(width, height);
+      state.nextFireAt = state.elapsed + 3900;
+    }
+    if (score >= 650 && state.elapsed >= state.nextMeteorAt) {
+      spawnMeteor(width, height);
+      state.nextMeteorAt = state.elapsed + 5200;
+    }
+
+    const player = {
+      x: game.trex.x,
+      y: game.trex.y,
+      width: game.trex.ducking ? 59 : 44,
+      height: game.trex.ducking ? 25 : 47
+    };
+
+    for (const attack of state.attacks) {
+      attack.age += dt;
+      attack.x += attack.vx * dt;
+
+      if (state.elapsed >= state.invulnerableUntil && hit(player, attack)) {
+        state.health = Math.max(0, state.health - 1);
+        state.invulnerableUntil = state.elapsed + 1100;
+        if (typeof game.setSpeed === "function") {
+          state.restoreSpeed = game.speed;
+          game.setSpeed(Math.max(3, game.speed * 0.62));
+          state.slowUntil = state.elapsed + 850;
+        }
+        attack.x = -1000;
+        if (state.health <= 0) {
+          state.gameOver = true;
+          if (runner && typeof runner.gameOver === "function") runner.gameOver();
+          return;
+        }
+      }
+    }
+
+    state.attacks = state.attacks.filter(a => a.x > -60 && a.age < 5000);
+
+    if (state.slowUntil && state.elapsed >= state.slowUntil) {
+      if (state.restoreSpeed !== null && typeof game.setSpeed === "function") {
+        game.setSpeed(state.restoreSpeed);
+      }
+      state.slowUntil = 0;
+      state.restoreSpeed = null;
+    }
+
     ctx.save();
-
-    drawTitle(ctx, width);
-    const bossScale = Math.max(1.45, Math.min(2.1, width / 290));
-    const bossX = width - 170;
-    const bossY = height - 103;
-    drawBoss(ctx, bossX, bossY, bossScale, state.elapsed);
-
-    // A baforada aparece em ciclos, com uma pequena pausa entre ataques.
-    const fireCycle = (state.elapsed - 3500) % 4200;
-    if (score >= 350 && state.elapsed >= 3500 && fireCycle < 1050) {
-      drawFire(ctx, width, height, state.elapsed);
-      ctx.fillStyle = "#b71c1c";
-      ctx.font = "bold 9px monospace";
-      ctx.fillText("FIRE!", 12, 26);
+    if (state.elapsed >= state.invulnerableUntil - 850 &&
+        state.elapsed < state.invulnerableUntil &&
+        Math.floor(state.elapsed / 90) % 2 === 0) {
+      ctx.globalAlpha = 0.42;
     }
 
-    // O meteoro entra mais tarde como evento de cenário.
-    if (score >= 650 && !state.meteorStarted) {
-      state.meteorStarted = true;
-      state.meteorAt = state.elapsed;
-    }
-    if (state.meteorStarted && state.elapsed - state.meteorAt < 2600) {
-      drawMeteor(ctx, width, height, state.elapsed);
-    }
-
+    drawBoss(ctx, width, height, state.elapsed);
+    for (const attack of state.attacks) drawAttack(ctx, attack, state.elapsed);
+    drawHud(ctx, width);
     ctx.restore();
   });
 
-  dino.on("restart", () => {
-    state.elapsed = 0;
-    state.meteorStarted = false;
-    state.meteorAt = 0;
-    state.gameOver = false;
-  });
-
-  dino.on("gameOver", () => {
-    state.gameOver = true;
-  });
-
-  dino.log("THE LAST RUN prototype loaded. Visual events only; base game is untouched.");
+  dino.on("restart", reset);
+  dino.on("gameOver", () => { state.gameOver = true; });
+  dino.log("THE LAST RUN: original Dino sprite boss and damage-based attacks loaded.");
 })();
