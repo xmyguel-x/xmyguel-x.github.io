@@ -83,7 +83,7 @@
       id: ++state.attackId,
       type: "meteor",
       x: width + 24,
-      y: height - 66,
+      y: height - 76,
       width: 17,
       height: 17,
       vx: -0.43,
