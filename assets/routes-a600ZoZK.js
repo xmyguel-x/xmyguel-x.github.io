@@ -106,6 +106,17 @@ dino.on("frame", ({ runner, ctx, deltaTime, game }) => {
     ctx.save();
     ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fillRect(0, 0, w, h);
     const fall = Math.min(1, (elapsed - 22000) / 2600);
+    if (tr && img) {
+      const scale = img.width > 900 ? 2 : 1;
+      const frame = (tr.currentAnimFrames && tr.currentAnimFrames[0]) || 88;
+      const sx = (tr.spritePos.x + frame) * scale, sy = tr.spritePos.y * scale;
+      const sw = tr.config.width * scale, sh = tr.config.height * scale;
+      const dw = tr.config.width * 2.4, dh = tr.config.height * 2.4;
+      const dx = w * 0.18, dy = ground - dh + 8;
+      ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+      ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(dx + dw * 0.73, dy + dh * 0.27, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(dx + dw * 0.75, dy + dh * 0.27, 2, 0, Math.PI * 2); ctx.fill();
+    }
     const mx = w * 0.72, my = -70 + fall * (h * 0.72 + 70);
     const meteor = ctx.createRadialGradient(mx - 8, my - 8, 3, mx, my, 42);
     meteor.addColorStop(0, "#fff7bd"); meteor.addColorStop(0.35, "#ffb02e"); meteor.addColorStop(1, "#a51e12");
