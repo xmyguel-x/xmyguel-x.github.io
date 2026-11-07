@@ -42,16 +42,10 @@
   }
 
   function scan() {
+    // Keep only the fullscreen control attached to the outer game stage.
+    // Do not add a second control directly over the canvas.
     const dinoStage = document.querySelector("#dino-stage");
     if (dinoStage) addFullscreenControl(dinoStage);
-
-    document.querySelectorAll("canvas").forEach(canvas => {
-      // The battle canvas is wider than the small Dino runner canvas.
-      const rect = canvas.getBoundingClientRect();
-      if (rect.width >= 400 || location.pathname.includes("batalha")) {
-        addFullscreenControl(canvas);
-      }
-    });
   }
 
   const observer = new MutationObserver(scan);
