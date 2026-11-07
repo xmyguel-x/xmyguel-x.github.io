@@ -23,11 +23,7 @@
     a.y < b.y + b.height && a.y + a.height > b.y;
 
   function getDinoSheet() {
-    const highDensity = document.getElementById("offline-resources-2x");
     const normal = document.getElementById("offline-resources-1x");
-    if (highDensity && highDensity.complete && highDensity.naturalWidth) {
-      return { image: highDensity, x: 1854, y: 2, width: 88, height: 94 };
-    }
     if (normal && normal.complete && normal.naturalWidth) {
       return { image: normal, x: 936, y: 2, width: 44, height: 47 };
     }
@@ -43,7 +39,7 @@
     const bossHeight = 47 * scale;
     const x = width - bossWidth - 24;
     const y = height - bossHeight - 10;
-    const frame = Math.floor(time / 150) % 2;
+    const frame = Math.floor(time / 190) % 2;
     const sourceX = sprite.x + frame * sprite.width;
 
     ctx.save();
@@ -69,11 +65,11 @@
     state.attacks.push({
       id: ++state.attackId,
       type: "fire",
-      x: width - 145,
+      x: width - 105,
       y: height - 30,
       width: 25,
       height: 13,
-      vx: -0.34,
+      vx: -0.72,
       age: 0
     });
   }
@@ -82,11 +78,11 @@
     state.attacks.push({
       id: ++state.attackId,
       type: "meteor",
-      x: width + 24,
-      y: height - 76,
+      x: width + 30,
+      y: height - 55,
       width: 17,
       height: 17,
-      vx: -0.43,
+      vx: -0.82,
       age: 0
     });
   }
@@ -147,22 +143,22 @@
     const width = game.width || 600;
     const height = game.height || 150;
 
-    if (score < 180) return;
+    if (score < 1000) return;
 
-    if (score >= 350 && state.nextFireAt === 0) {
-      state.nextFireAt = state.elapsed + 900;
+    if (score >= 1500 && state.nextFireAt === 0) {
+      state.nextFireAt = state.elapsed + 1800;
     }
-    if (score >= 650 && state.nextMeteorAt === 0) {
-      state.nextMeteorAt = state.elapsed + 1700;
+    if (score >= 2500 && state.nextMeteorAt === 0) {
+      state.nextMeteorAt = state.elapsed + 2500;
     }
 
-    if (score >= 350 && state.elapsed >= state.nextFireAt) {
+    if (score >= 1500 && state.elapsed >= state.nextFireAt) {
       spawnFire(width, height);
-      state.nextFireAt = state.elapsed + 3900;
+      state.nextFireAt = state.elapsed + 5200;
     }
-    if (score >= 650 && state.elapsed >= state.nextMeteorAt) {
+    if (score >= 2500 && state.elapsed >= state.nextMeteorAt) {
       spawnMeteor(width, height);
-      state.nextMeteorAt = state.elapsed + 5200;
+      state.nextMeteorAt = state.elapsed + 6800;
     }
 
     const player = {
@@ -193,7 +189,7 @@
       }
     }
 
-    state.attacks = state.attacks.filter(a => a.x > -60 && a.age < 5000);
+    state.attacks = state.attacks.filter(a => a.x > -60 && a.age < 16000);
 
     if (state.slowUntil && state.elapsed >= state.slowUntil) {
       if (state.restoreSpeed !== null && typeof game.setSpeed === "function") {
