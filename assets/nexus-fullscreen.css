@@ -1,0 +1,47 @@
+
+/* NEXUS fullscreen add-on */
+[data-nexus-fullscreen] { position: relative; }
+.nexus-fullscreen-button {
+  position: absolute;
+  z-index: 99999;
+  top: 8px;
+  right: 8px;
+  padding: 8px 11px;
+  border: 2px solid #a7f3d0;
+  border-radius: 4px;
+  background: #10251f;
+  color: #eafff5;
+  font: 600 12px/1.2 "IBM Plex Mono", monospace;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 #000;
+}
+.nexus-fullscreen-button:hover { background: #1d493b; }
+.nexus-fullscreen-button:focus-visible { outline: 3px solid #facc15; outline-offset: 3px; }
+[data-nexus-fullscreen]:fullscreen {
+  box-sizing: border-box;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 48px 16px 16px !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  overflow: auto;
+  background: #080d0b !important;
+}
+[data-nexus-fullscreen]:fullscreen canvas {
+  max-width: min(96vw, 1200px) !important;
+  max-height: 82vh !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain;
+}
+[data-nexus-fullscreen]:fullscreen .nexus-fullscreen-button {
+  position: fixed;
+  top: 12px;
+  right: 14px;
+}
