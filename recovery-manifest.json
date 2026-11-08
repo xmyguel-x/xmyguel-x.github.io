@@ -2,19 +2,48 @@
   "original_page": "https://id-preview--79b70b58-6d56-4956-b652-b34cb494d8a8.lovable.app/",
   "recovered_modules": [
     {
+      "path": "/assets/batalha-B9bTLxU3.js",
+      "bytes": 7540
+    },
+    {
       "path": "/assets/engine-_K4YV0Me.js",
-      "bytes": 61166
+      "bytes": 61254
+    },
+    {
+      "path": "/assets/index-DX1qfN7c.js",
+      "bytes": 580095
+    },
+    {
+      "path": "/assets/nexus-fullscreen.css",
+      "bytes": 1896
     },
     {
       "path": "/assets/routes-a600ZoZK.js",
-      "bytes": 77274
+      "bytes": 94674
     },
     {
-      "path": "/assets/batalha-B9bTLxU3.js",
-      "bytes": 7230
+      "path": "/assets/styles-Yz9btNF_.css",
+      "bytes": 82770
     }
   ],
-  "main_bundle_bytes": 580094,
+  "main_bundle_bytes": 580095,
   "stylesheet_rules": 89,
-  "fullscreen_added": true
+  "fullscreen_added": true,
+  "version": "1.1.0",
+  "updated": "2026-11-08",
+  "changes": [
+    "favicon animado",
+    "mod Final: T-Rex Gigante",
+    "sprite-2x corrigido (HiDPI)",
+    "404.html (rotas no GitHub Pages)",
+    "URLs de modulos unificadas (React duplicado)",
+    "sons 8-bit",
+    "README com screenshots",
+    "CHANGELOG, CONTRIBUTING e LICENSE",
+    "verificador de site + CI",
+    "CSS morto do badge Lovable removido",
+    "modulepreload duplicado removido",
+    "og:image apontando para o repositorio"
+  ],
+  "published_to": "https://xmyguel-x.github.io/"
 }
