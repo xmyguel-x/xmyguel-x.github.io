@@ -1,0 +1,47 @@
+# Verificador do site — CI do GitHub Actions
+#
+# Este arquivo fica em docs/ porque o fluxo automatizado de publicacao nao
+# consegue gravar arquivos dentro de .github/workflows/. Para ativar a CI:
+#
+#   cp docs/verify-site.yml .github/workflows/verify-site.yml
+#
+# A partir dai, todo push e todo Pull Request rodam o scripts/verify_site.py.
+#
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Confere os arquivos do site
+        run: python3 scripts/verify_site.py
+
+      - name: Confere que o HTML nao tem lixo de build
+        run: |
+          # CSS morto do badge do Lovable e query strings em modulos ES
+          # quebraram o site antes. Nenhum dos dois pode voltar.
+          if grep -q 'lovable-badge' index.html; then
+            echo "::error::index.html ainda tem o CSS morto do badge do Lovable"
+            exit 1
+          fi
+          if grep -qE '(src|href)="[^"]*\?v=' index.html; then
+            echo "::error::index.html tem modulo ES com query string (duplica o React)"
+            exit 1
+          fi
+
+      - name: Confere que o 404 devolve para a raiz
+        run: |
+          test -f 404.html || { echo "::error::404.html ausente"; exit 1; }
+          grep -q 'dinomod:redirect' 404.html || {
+            echo "::error::404.html nao faz o fallback de rota"; exit 1; }
