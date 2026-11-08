@@ -245,6 +245,7 @@ index.html            página (instantâneo do app + scripts de inicialização)
 404.html              fallback de rotas do GitHub Pages (links diretos como /batalha)
 favicon.js            favicon animado que acompanha o dino
 favicon.svg           ícone estático do site
+favicon.ico           mesmo ícone, no caminho que o navegador pede sozinho
 apple-touch-icon.svg  ícone para a tela inicial do iOS
 fullscreen.js         botão de tela cheia
 assets/
@@ -313,6 +314,9 @@ A folha de sprites 2x (`dino/sprite-2x-v2.svg`) precisa ter o mesmo layout da 1x
 
 **Os PNGs do repositório são `.svg`.**
 É de propósito: o SVG carrega o PNG original embutido em base64, para que o fluxo automatizado de publicação consiga gravar o arquivo (que é texto). Os pixels são idênticos. Veja [Por que alguns PNGs são `.svg`](#por-que-alguns-pngs-são-svg).
+
+**Por que existe um `favicon.ico` que é um SVG?**
+O roteador injeta `<link rel="icon" href="/favicon.ico">` em tempo de execução, e o navegador pede esse caminho antes de qualquer script rodar. Como não dá para gravar um ICO binário pelo mesmo fluxo que gravou o resto, o arquivo serve o mesmo SVG do `favicon.svg` — o pedido volta com 200 em vez de 404, e o `favicon.js` desenha o dino animado por cima dele.
 
 **Meu mod parou de funcionar.**
 Abra o console (`F12`): o DinoMod registra o erro e desativa só o trecho que falhou. O resto do jogo continua.

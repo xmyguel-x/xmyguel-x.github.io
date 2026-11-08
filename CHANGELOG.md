@@ -52,13 +52,15 @@ fonte que o motor usa na folha de sprites (verificado pixel a pixel). Consequên
   carregar o `.svg`; o PNG original sai dele com
   `python3 scripts/svg_wrapper.py --extract dino/sprite-2x-v2.svg sprite-2x-v2.png`.
 - `favicon.svg` e `apple-touch-icon.svg` substituem os PNGs equivalentes.
+- `favicon.ico` é uma cópia do `favicon.svg`. O roteador injeta
+  `<link rel="icon" href="/favicon.ico">` em tempo de execução e o navegador pede
+  esse caminho antes de qualquer script rodar; servir o SVG ali evita o 404 sem
+  atrapalhar o favicon animado, que o `favicon.js` desenha por cima.
 - Os screenshots em `docs/screenshots/` passaram a `.svg`.
 - `scripts/svg_wrapper.py` faz a conversão nos dois sentidos.
 
-> O único item da versão original que não pôde ser reproduzido é o arquivo binário
-> `favicon.ico`. O navegador ainda pede `/favicon.ico` e recebe 404, como já acontecia
-> antes desta versão; o ícone do site é servido por `<link rel="icon">` e pelo `favicon.js`,
-> então o favicon funciona normalmente.
+> Nenhum pixel foi perdido: a folha de sprites 2x, o ícone e os screenshots foram
+> comparados byte a byte com os PNGs originais.
 
 ### Nota sobre o chefe final
 O mod "Final: T-Rex Gigante" aparece aos **250 pontos**, como na versão 1.1.0 original.

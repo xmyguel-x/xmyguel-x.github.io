@@ -19,6 +19,7 @@
   cv.width = cv.height = SIZE;
   var ctx = cv.getContext("2d");
   var lastKey = "";
+  var lastPng = null;
   var blinkUntil = 0, nextBlink = performance.now() + 1800;
 
   function state() {
@@ -57,6 +58,16 @@
     return list;
   }
 
+  function apply() {
+    // Troca o href de todas as tags de ícone pelo desenho atual. Como o
+    // desenho é um data URI, o navegador não faz nenhuma requisição extra —
+    // nem do /favicon.ico que o roteador injeta.
+    if (!lastPng) return;
+    links().forEach(function (l) {
+      if (l.getAttribute("href") !== lastPng) l.href = lastPng;
+    });
+  }
+
   function draw(s) {
     ctx.clearRect(0, 0, SIZE, SIZE);
     ctx.fillStyle = s.night ? "#202124" : "#f7f7f7";
@@ -74,18 +85,19 @@
     if (!ready) return;
     var s = state();
     var key = s.name + (s.night ? "n" : "d");
-    var list = links();
-    var animated = list.every(function (l) {
-      var href = l.getAttribute("href");
-      return href && href.indexOf("data:") === 0;
-    });
-    if (key === lastKey && animated) return;
-    lastKey = key;
-    try {
-      draw(s);
-      var png = cv.toDataURL("image/png");
-      list.forEach(function (l) { l.href = png; });
-    } catch (e) { /* canvas bloqueado: mantém o ícone estático */ }
+    if (key !== lastKey) {
+      lastKey = key;
+      try { draw(s); lastPng = cv.toDataURL("image/png"); } catch (e) { /* canvas bloqueado: mantém o ícone estático */ }
+    }
+    apply();
+  }
+
+  // O roteador pode injetar a tag de ícone depois que esta script carregou.
+  // Observar o DOM garante que ela receba o desenho animado antes que o
+  // navegador saia buscar o /favicon.ico.
+  if (window.MutationObserver) {
+    new MutationObserver(function () { apply(); })
+      .observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ["href", "rel"] });
   }
 
   window.__dinoFavicon = { state: state, tick: tick };   // útil para testes
