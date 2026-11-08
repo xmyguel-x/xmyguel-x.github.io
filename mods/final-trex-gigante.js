@@ -1,10 +1,10 @@
 // ===== FINAL: T-REX GIGANTE =====
-// Aos 250 pontos surge um T-Rex gigante cuspindo fogo. Desvie das bolas de fogo
+// Aos 10.000 pontos surge um T-Rex gigante cuspindo fogo. Desvie das bolas de fogo
 // (pule as que vêm rente ao chão, abaixe nas que vêm na altura da cabeça).
 // Se sobreviver, um meteoro cai sobre ele, tudo para e aparece "CONTINUE IN CHROME".
 // Enter reinicia o jogo.
 
-const BOSS_SCORE = 250;            // pontuação em que o chefe aparece
+const BOSS_SCORE = 10000;            // pontuação em que o chefe aparece
 const S = 2.4;                     // tamanho do chefe (1 = dino normal)
 const FW = 44, FH = 47;            // tamanho de um quadro do T-Rex no sprite
 const W = 600, H = 150, GROUND = 140;
